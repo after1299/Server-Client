@@ -1,0 +1,15 @@
+Server {
+    bcryptjs
+    cors
+    dotenv
+    express
+    joi
+    jsonwebtoken
+    mongoose
+    passport
+    passport-jwt
+    passport-local
+}
+Clinet {
+    axios
+}
