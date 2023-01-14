@@ -11,5 +11,5 @@ Server {
     passport-local
 }
 Clinet {
-    axios
+    axios // to transfer HTTP request to server
 }
