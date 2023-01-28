@@ -24,13 +24,14 @@ router.get("/", (req, res) => {
 
 router.get("/:_id", (req, res) => {
   let { _id } = req.params;
-  Course.findOne({ _id }).populate("instructor", ["email"])
-  .then((course) => {
-    res.send(course);
-})
-  .catch((e) => {
-    res.send(e);
-})
+  Course.findOne({ _id })
+    .populate("instructor", ["email"])
+    .then((course) => {
+      res.send(course);
+    })
+    .catch((e) => {
+      res.send(e);
+    });
 });
 
 router.post("/", async (req, res) => {
@@ -55,68 +56,86 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/instructor/:_instructor_id", (req, res) => {
+  let { _instructor_id } = req.params;
+  Course.find({ instructor: _instructor_id }).populate("instructor", [
+    "username",
+    "email",
+  ]).then(data => {
+    res.send(data);
+  }).catch(e => {
+    res.status(500).send("Cannot get course data.")
+  })
+});
+
 router.patch("/:_id", async (req, res) => {
   // validate the inputs before making a new course.
-  const {error} = courseValidation(req.body);
-  if(error) return res.status(400).send(error.details[0].message);
+  const { error } = courseValidation(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-  let {_id} = req.params;
-  let course = await Course.findOne({_id});
+  let { _id } = req.params;
+  let course = await Course.findOne({ _id });
   if (!course) {
     res.status(404);
     return res.json({
       success: false,
       message: "Course not found.",
-    })
+    });
   }
   if (course.instructor.equals(req.user._id) || req.user.isAdmin()) {
-    Course.findOneAndUpdate({_id}, req.body, {
+    Course.findOneAndUpdate({ _id }, req.body, {
       mew: true,
       runValidators: true,
-    }).then(() => {
-      res.send("Course updated.");
-    }).catch((e) => {
-      res.send({
-        success: false,
-        message: e,
-      })
     })
+      .then(() => {
+        res.send("Course updated.");
+      })
+      .catch((e) => {
+        res.send({
+          success: false,
+          message: e,
+        });
+      });
   } else {
     res.status(403);
     return res.json({
       success: false,
-      message: "Only the instructor of this course or web admin can edit this course."
-    })
+      message:
+        "Only the instructor of this course or web admin can edit this course.",
+    });
   }
-})
+});
 
-router.delete("/:_id", async(req, res) => {
-  let {_id} = req.params;
-  let course = await Course.findOne({_id});
+router.delete("/:_id", async (req, res) => {
+  let { _id } = req.params;
+  let course = await Course.findOne({ _id });
   if (!course) {
     res.status(404);
     return res.json({
       success: false,
       message: "Course not found.",
-    })
+    });
   }
 
   if (course.instructor.equals(req.user._id) || req.user.isAdmin()) {
-    Course.deleteOne({_id}).then(() => {
-      res.send("Course deleted.");
-    }).catch((e) => {
-      res.send({
-        success: false,
-        message: e,
+    Course.deleteOne({ _id })
+      .then(() => {
+        res.send("Course deleted.");
       })
-    })
+      .catch((e) => {
+        res.send({
+          success: false,
+          message: e,
+        });
+      });
   } else {
     res.status(403);
     return res.json({
       success: false,
-      message: "Only the instructor of this course or web admin can edit this course."
-    })
+      message:
+        "Only the instructor of this course or web admin can edit this course.",
+    });
   }
-})
+});
 
 module.exports = router;

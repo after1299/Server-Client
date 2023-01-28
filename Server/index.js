@@ -28,7 +28,7 @@ app.use(cors());
 // router
 app.use("/api/user", authRoute);
 app.use(
-  "/api/courses",
+  "/api/course",
   passport.authenticate("jwt", { session: false }),
   courseRoute
 );
