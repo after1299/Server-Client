@@ -58,15 +58,50 @@ router.post("/", async (req, res) => {
 
 router.get("/instructor/:_instructor_id", (req, res) => {
   let { _instructor_id } = req.params;
-  Course.find({ instructor: _instructor_id }).populate("instructor", [
-    "username",
-    "email",
-  ]).then(data => {
-    res.send(data);
-  }).catch(e => {
-    res.status(500).send("Cannot get course data.")
-  })
+  Course.find({ instructor: _instructor_id })
+    .populate("instructor", ["username", "email"])
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((e) => {
+      res.status(500).send("Cannot get course data.");
+    });
 });
+
+router.get("/student/:_student_id", (req, res) => {
+  let { _student_id } = req.params;
+  Course.find({ students: _student_id })
+    .populate("instructor", ["username", "email"])
+    .then((courses) => {
+      res.status(200).send(courses);
+    })
+    .catch(() => {
+      res.status(500).send("Cannot get data.");
+    });
+});
+
+router.get("/findByName/:name", (req, res) => {
+  let { name } = req.params;
+  Course.find({ title: name })
+    .populate("instructor", ["username", "email"])
+    .then((course) => {
+      res.status(200).send(course);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+});
+
+router.post("/enroll/:_id", async (req, res) => {
+  let {_id} = req.params;
+  let {user_id} = req.body;
+  try {
+    let course = await Course.findOne({_id});
+    course.students.push(user_id);
+    await course.save();
+    res.send("Done Enrollment.");
+  } catch(err) {res.send(err)}
+})
 
 router.patch("/:_id", async (req, res) => {
   // validate the inputs before making a new course.
